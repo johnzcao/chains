@@ -24,7 +24,11 @@ extract.data <- function(path){
   raw.data$`Target Name` <- as.factor(raw.data$`Target Name`)
   raw.data$Task <- as.factor(raw.data$Task)
   
-  return(raw.data)
+  # separate data by tasks
+  tasks <- levels(raw.data$Task)
+  sep.data <- lapply(tasks,function(x) raw.data[raw.data$Task==x,])
+  names(sep.data) <- tasks
+  return(sep.data)
 }
 
 
