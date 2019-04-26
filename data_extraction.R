@@ -1,27 +1,31 @@
-library(readxl)
-# read entire table
-# data.path <- "~/Desktop/Godley lab/qPCR data/20180712 ChIP qPCR validation_data.xls"
-data.path <- "~/Desktop/Godley lab/qPCR data/20190109 JQ1 Hypoxia Plate 1_data.xls"
-data <- read_excel(data.path,
-                   col_names = F)
-# determine header rows and re-read table without the header rows
-nrow.header <- which(grepl(TRUE,is.na(data[,1])))
-data <- read_excel(data.path,skip = nrow.header)
+# Test data
+# data.path <- "~/Desktop/Godley lab/qPCR data/20190109 JQ1 Hypoxia Plate 1_data.xls"
 
-# reformat certain colomns
-data$`Sample Name` <- as.factor(data$`Sample Name`)
-data$`Target Name` <- as.factor(data$`Target Name`)
-data$Task <- as.factor(data$Task)
+# function for reading excel qPCR data
 
-# Check types of tasks
-
-include.standard <- "STANDARD" %in% levels(data$Task)
-if(!"NTC" %in% levels(data$Task)){
-  warning("No NTC found!")
+extract.data <- function(path){
+  library(readxl)
+  # read entire table
+  raw.data <- read_excel(path, col_names = F)
+  # determine header rows and re-read table without the header rows
+  nrow.header <- which(grepl(TRUE,is.na(raw.data[,1])))
+  raw.data <- read_excel(data.path,skip = nrow.header)
+  
+  # extract essential columns
+  essential.columns <- c("Sample Name","Target Name","Task","Cт","Quantity")
+  raw.data <- raw.data[,essential.columns]
+  
+  # remove empty rows
+  empty.rows <- apply(raw.data, 1, function(raw.data) all(is.na(raw.data)))
+  raw.data <- raw.data[!empty.rows,]
+  
+  # reformat certain colomns
+  raw.data$`Sample Name` <- as.factor(raw.data$`Sample Name`)
+  raw.data$`Target Name` <- as.factor(raw.data$`Target Name`)
+  raw.data$Task <- as.factor(raw.data$Task)
+  
+  return(raw.data)
 }
 
-# clean up unessessary rows and columns
 
-
-levels(data$`Sample Name`)
 
