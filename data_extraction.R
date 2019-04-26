@@ -9,7 +9,7 @@ extract.data <- function(path){
   raw.data <- read_excel(path, col_names = F)
   # determine header rows and re-read table without the header rows
   nrow.header <- which(grepl(TRUE,is.na(raw.data[,1])))
-  raw.data <- read_excel(data.path,skip = nrow.header)
+  raw.data <- read_excel(path,skip = nrow.header)
   
   # extract essential columns
   essential.columns <- c("Sample Name","Target Name","Task","Cт","Quantity")
