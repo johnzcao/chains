@@ -15,6 +15,11 @@ auto.outlier <- TRUE # auto detect and exclude outliers if at least triplicates
 # data extraction and initial processing
 source("data_extraction.R")
 
+# load auto outlier if enabled
+if(auto.outlier==T){
+  source("outlier.R")
+}
+
 # Warning if no NTC is found in data, but proceed with analysis
 if(!"NTC" %in% names(sep.data)){
   warning("No NTC found!")
@@ -40,6 +45,10 @@ if("STANDARD" %in% names(sep.data)){
       standard.sd[as.character(x),y] <- sd(z)
     }
   }
+  # run auto outlier detection
+  if(length(z)>2 & auto.outlier==T){
+    outlier.report <- outlier(standard,standard.mean,standard.sd,is.standard = T)
+  }
   # clean up environment
   rm(dilutions,targets,standard,x,y,z)
 }
@@ -63,6 +72,9 @@ if(!"UNKNOWN" %in% names(sep.data)) {
       unknown.mean[x,y] <- mean(z)
       unknown.sd[x,y] <- sd(z)
     }
+  }
+  if(length(z)>2 & auto.outlier==T){
+    outlier.report <- outlier(unknown,unknown.mean,unknown.sd,threshold = 0.1,is.standard = F)
   }
   # clean up environment
   rm(samples,targets,unknown,x,y,z)
