@@ -25,34 +25,6 @@ if(!"NTC" %in% names(sep.data)){
   warning("No NTC found!")
 }
 
-# determine if Standards are present, and calculate mean and SD
-if("STANDARD" %in% names(sep.data)){
-  # create empty data frames for mean and sd
-  standard <- sep.data[["STANDARD"]]
-  targets <- levels(standard$`Target Name`)
-  dilutions <- levels(as.factor(standard$`Quantity`))
-  standard.mean <- data.frame(matrix(NA,nrow = length(dilutions),ncol = length(targets)+1))
-  row.names(standard.mean) <- dilutions
-  colnames(standard.mean) <- c("Quantity",targets)
-  standard.mean$Quantity <- as.numeric(dilutions)
-  standard.sd <- standard.mean # copy empty dataframe
-  # calculate mean and sd for each target/dilution pair
-  # functional but probably inefficient solution with for loops
-  for(x in as.numeric(dilutions)){
-    for(y in targets){
-      z <- standard[standard$Quantity==x & standard$`Target Name`==y,]$Cт
-      standard.mean[as.character(x),y] <- mean(z)
-      standard.sd[as.character(x),y] <- sd(z)
-    }
-  }
-  # run auto outlier detection
-  if(length(z)>2 & auto.outlier==T){
-    outlier.report <- outlier(standard,standard.mean,standard.sd,is.standard = T)
-  }
-  # clean up environment
-  rm(dilutions,targets,standard,x,y,z)
-}
-
 # Calculate unknown meansand sd 
 if(!"UNKNOWN" %in% names(sep.data)) {
   stop("No Unknown found in data!")
