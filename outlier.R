@@ -1,7 +1,7 @@
 # Auto detect outliers
 
-testOutlier <- function(x,data, is.sd=is.standard){ # x must be a pair of Sample/Target names
-  if(is.sd==T){
+testOutlier <- function(x,data, is.stand=FALSE){ # x must be a pair of Sample/Target names
+  if(is.stand==TRUE){
     cts <- data[data$`Quantity`==as.numeric(x[1]) & data$`Target Name`==x[2],]
   }else{
     cts <- data[data$`Sample Name`==x[1] & data$`Target Name`==x[2],]
@@ -33,7 +33,7 @@ outlier <- function(data,data.mean,data.sd,threshold=0.5,is.standard=FALSE){
     row.names(highsd) <- 1:nrow(highsd) # rename is necessary to avoid duplicates in the results
     colnames(highsd) <- c("sample","target")
     # apply the detection function to identify the well that cause the most SD
-    results <- apply(highsd,1,function(x) testOutlier(x,data))
+    results <- apply(highsd,1,function(x) testOutlier(x,data,is.stand = is.standard))
     # directly change values in mean and sd table
     report <- data.frame(matrix(NA,nrow = nrow(highsd), ncol = 5))
     colnames(report) <- c("Sample","Target","Outlier","new_mean","new_sd")
@@ -46,12 +46,12 @@ outlier <- function(data,data.mean,data.sd,threshold=0.5,is.standard=FALSE){
   }
 }
 
-threshold=0.1
-data <- standard
-data.mean <- standard.mean
-data.sd <- standard.sd
-is.standard <- F
+#threshold=0.1
+#data <- standard
+#data.mean <- standard.mean
+#data.sd <- standard.sd
+#is.standard <- F
 
-data <- unknown
-data.mean <- unknown.mean
-data.sd <- unknown.sd
+#data <- unknown
+#data.mean <- unknown.mean
+#data.sd <- unknown.sd
