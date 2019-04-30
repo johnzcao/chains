@@ -11,6 +11,9 @@ extract.data <- function(path){
   raw.data <- read_excel(path,skip = nrow.header)
   
   # extract essential columns
+  if("CT" %in% colnames(raw.data)){
+    colnames(raw.data)[colnames(raw.data)=="CT"] <- "Cт"
+  }
   essential.columns <- c("Well","Sample Name","Target Name","Task","Cт","Quantity")
   raw.data <- raw.data[,essential.columns]
 
