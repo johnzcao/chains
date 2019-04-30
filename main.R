@@ -36,8 +36,8 @@ if("STANDARD" %in% names(sep.data)){
   for(x in as.numeric(dilutions)){
     for(y in targets){
       z <- standard[standard$Quantity==x & standard$`Target Name`==y,]$Cт
-      standard.mean[x,as.character(y)] <- mean(z)
-      standard.sd[x,as.character(y)] <- sd(z)
+      standard.mean[as.character(x),y] <- mean(z)
+      standard.sd[as.character(x),y] <- sd(z)
     }
   }
   # clean up environment
