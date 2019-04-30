@@ -1,15 +1,73 @@
 # Main script for data processing
 
 # Test data set(s)
-test.data <- c("~/Desktop/Godley lab/qPCR data/20170926 TF-1 TET3 18S_data.xls")
+data.path <- c("Test_data_1.xls","Test_data_2.xls")
+data.path <- c("Test_data_3.xls")
 
-# load necessary functions
-source("data_extraction.R")
+library(dplyr)
+# Define analysis mode and controls. May be interactive in future versions
+analysis.method <- "DD" # Plan to have: DD = ΔΔCт, D = ΔCт, chip = percent input, Q = quantity
+E <- 2 # Default amplification efficiency unless corrected by standards
+hkg <- "18S" # Housekeeping gene
+ctr <- "HEL D1" # control sample to compare to
+auto.outlier <- TRUE # auto detect and exclude outliers if at least triplicates
 
 # data extraction and initial processing
-# currently not able to load multiple files
-sep.data <- extract.data(path = test.data)
+source("data_extraction.R")
+
+# Warning if no NTC is found in data, but proceed with analysis
 if(!"NTC" %in% names(sep.data)){
   warning("No NTC found!")
 }
+
+# determine if Standards are present, and calculate mean and SD
+if("STANDARD" %in% names(sep.data)){
+  # create empty data frames for mean and sd
+  standard <- sep.data[["STANDARD"]]
+  targets <- levels(standard$`Target Name`)
+  dilutions <- levels(as.factor(standard$`Quantity`))
+  standard.mean <- data.frame(matrix(NA,nrow = length(dilutions),ncol = length(targets)+1))
+  row.names(standard.mean) <- dilutions
+  colnames(standard.mean) <- c("Quantity",targets)
+  standard.mean$Quantity <- as.numeric(dilutions)
+  standard.sd <- standard.mean # copy empty dataframe
+  # calculate mean and sd for each target/dilution pair
+  # functional but probably inefficient solution with for loops
+  for(x in as.numeric(dilutions)){
+    for(y in targets){
+      z <- standard[standard$Quantity==x & standard$`Target Name`==y,]$Cт
+      standard.mean[x,as.character(y)] <- mean(z)
+      standard.sd[x,as.character(y)] <- sd(z)
+    }
+  }
+  # clean up environment
+  rm(dilutions,targets,standard,x,y,z)
+}
+
+# Calculate unknown meansand sd 
+if(!"UNKNOWN" %in% names(sep.data)) {
+  stop("No Unknown found in data!")
+}else{
+  unknown <- sep.data[["UNKNOWN"]]
+  targets <- levels(unknown$`Target Name`)
+  samples <- levels(unknown$`Sample Name`)
+  unknown.mean <- data.frame(matrix(NA,nrow = length(samples),ncol = length(targets)))
+  row.names(unknown.mean) <- samples
+  colnames(unknown.mean) <- targets
+  unknown.sd <- unknown.mean # copy empty dataframe
+  # calculate mean and sd for each target/dilution pair
+  # functional but probably inefficient solution with for loops
+  for(x in samples){
+    for(y in targets){
+      z <- unknown[unknown$`Sample Name`==x & unknown$`Target Name`==y,]$Cт
+      unknown.mean[x,y] <- mean(z)
+      unknown.sd[x,y] <- sd(z)
+    }
+  }
+  # clean up environment
+  rm(samples,targets,unknown,x,y,z)
+}
+
+
+
 
