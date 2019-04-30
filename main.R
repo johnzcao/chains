@@ -11,6 +11,7 @@ E <- 2 # Default amplification efficiency unless corrected by standards
 hkg <- "18S" # Housekeeping gene
 ctr <- "HEL D1" # control sample to compare to
 auto.outlier <- TRUE # auto detect and exclude outliers if at least triplicates
+SD.threshold <- 0.5 # default sd threshold for outlier detection
 
 # data extraction and initial processing
 source("data_extraction.R")
@@ -32,7 +33,7 @@ if(!"UNKNOWN" %in% names(sep.data)) {
   unknown <- sep.data[["UNKNOWN"]]
   targets <- levels(unknown$`Target Name`)
   samples <- levels(unknown$`Sample Name`)
-  unknown.mean <- data.frame(matrix(NA,nrow = length(samples),ncol = length(targets)))
+  unknown.mean <- matrix(NA,nrow = length(samples),ncol = length(targets)) %>% data.frame()
   row.names(unknown.mean) <- samples
   colnames(unknown.mean) <- targets
   unknown.sd <- unknown.mean # copy empty dataframe
@@ -46,8 +47,23 @@ if(!"UNKNOWN" %in% names(sep.data)) {
     }
   }
   if(length(z)>2 & auto.outlier==T){
-    outlier.report <- outlier(unknown,unknown.mean,unknown.sd,threshold = 0.1,is.standard = F)
+    outlier.report <- outlier(unknown,
+                              unknown.mean,
+                              unknown.sd,
+                              threshold = SD.threshold,
+                              is.standard = F)
+    if(!is.null(outlier.report)){
+      for(k in 1:nrow(outlier.report)){
+        samp <- outlier.report[k,1]
+        targ <- outlier.report[k,2]
+        newm <- outlier.report[k,4]
+        newsd <- outlier.report[k,5]
+        unknown.mean[samp,targ] <- newm
+        unknown.sd[samp,targ] <- newsd
+      }
+    }
   }
+  
   # clean up environment
   rm(samples,targets,unknown,x,y,z)
 }
