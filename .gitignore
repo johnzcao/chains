@@ -3,3 +3,5 @@
 .RData
 .Ruserdata
 chains.Rproj
+.DS_Store
+.Rapp.history
