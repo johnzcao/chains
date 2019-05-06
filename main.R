@@ -3,15 +3,17 @@
 # Test data set(s)
 data.path <- c("Test_data_1.xls","Test_data_2.xls")
 data.path <- c("Test_data_3.xls")
+data.path <- c("Test_data_4.xls")
+data.path <- c("TF-1 data.xlsx")
 
 library(dplyr)
 # Define analysis mode and controls. May be interactive in future versions
 analysis.method <- "DD" # Plan to have: DD = ΔΔCт, D = ΔCт, chip = percent input, Q = quantity
 E <- 2 # Default amplification efficiency unless corrected by standards
 hkg <- "18S" # Housekeeping gene
-ctr <- "HEL D1" # control sample to compare to
+ctr <- "TF-1 D1" # control sample to compare to
 auto.outlier <- TRUE # auto detect and exclude outliers if at least triplicates
-SD.threshold <- 0.5 # default sd threshold for outlier detection
+SD.threshold <- 0.3 # default sd threshold for outlier detection
 
 # data extraction and initial processing
 source("data_extraction.R")
@@ -68,6 +70,15 @@ if(!"UNKNOWN" %in% names(sep.data)) {
   rm(samples,targets,unknown,x,y,z)
 }
 
+# delta-delta Ct method
 
+hkCt <- unknown.mean[,hkg]
+
+unknown.dCt <- apply(unknown.mean,2,function(x) x-hkCt) %>% as.data.frame()
+
+pct.hkg <- 2^-unknown.dCt %>% as.data.frame()
+
+ctrCt <- unknown.dCt[ctr,] %>% as.numeric()
+unknown.FC <- apply(unknown.dCt,1,function(x) E^-(x-ctrCt)) %>% t() %>% as.data.frame()
 
 
