@@ -8,7 +8,7 @@ data.path <- c("TF-1 data.xlsx")
 
 library(dplyr)
 # Define analysis mode and controls. May be interactive in future versions
-analysis.method <- "DD" # Plan to have: DD = ΔΔCт, D = ΔCт, chip = percent input, Q = quantity
+analysis.method <- "dct" # Plan to have: ddct = ΔΔCт, dct = ΔCт, chip = percent input, Q = quantity
 E <- 2 # Default amplification efficiency unless corrected by standards
 hkg <- "18S" # Housekeeping gene
 ctr <- "TF-1 D1" # control sample to compare to
@@ -70,15 +70,7 @@ if(!"UNKNOWN" %in% names(sep.data)) {
   rm(samples,targets,unknown,x,y,z)
 }
 
-# delta-delta Ct method
+source("analysis.R")
 
-hkCt <- unknown.mean[,hkg]
-
-unknown.dCt <- apply(unknown.mean,2,function(x) x-hkCt) %>% as.data.frame()
-
-pct.hkg <- 2^-unknown.dCt %>% as.data.frame()
-
-ctrCt <- unknown.dCt[ctr,] %>% as.numeric()
-unknown.FC <- apply(unknown.dCt,1,function(x) E^-(x-ctrCt)) %>% t() %>% as.data.frame()
 
 
