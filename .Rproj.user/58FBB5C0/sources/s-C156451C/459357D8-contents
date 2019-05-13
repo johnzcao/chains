@@ -1,0 +1,88 @@
+#define variables
+
+namesofcol <- c("Quantity", "Ct mean")
+colnames(matrixydata) <- namesofcol
+standards <- sep.data$STANDARD
+standards <- sep.data[["STANDARD"]]
+quantitylist <- unique(standards$Quantity)
+row.names(matrixydata) <- as.factor(standards$Quantity) %>% levels()
+#count <- 1
+
+#construct table
+
+variablenumber <- levels(standards$`Target Name`) %>% length()
+observnumber <- as.factor(standards$Quantity) %>% levels() %>% length()
+matrixydata <- as.data.frame(matrix(NA,observnumber,variablenumber+1))
+namesofcol <- c("Quantity", "Target1", "Target2")
+colnames(matrixydata) <- namesofcol
+
+for (i in quantitylist){
+  #x <- 
+  matrixydata[as.character(i),"Ct mean"]<-as.numeric(standards[standards$`Target Name`=="TET1" & standards$Quantity== i,]$Cт) %>% mean()
+  #print(x)
+  #standards[standards$`Target Name`=="TET1" & standards$Quantity== i,] %>% 
+  #matrixydata[matrixydata$`Ct mean`]<-mean(x$Cт)
+  #count= count+1
+}
+#apply lapply method
+
+# how to generate a dynamic list in r
+for (i in quantitylist){
+  pairypair1 <- list(c(i,levels(standard$`Target Name`[1])))
+  pairypair2
+}
+listtry_target <- c(levels(standard$`Target Name`))
+listtry_quant <- c(levels(as.factor(standards$Quantity)))
+
+#maybe <- function(x){ 
+ # append(lapply(quantity,function(y) c(x,y)))) 
+}
+funsep <- function(x){
+  lapply(listtry_quant,function(y) c(x,y))
+}
+lapply(listtry_target,funsep)
+
+
+lapply(listtry_target, function(x) lapply(listtry_quant,function(y) c(x,y)))
+
+
+for (i in listtry_target){
+  for (j in listtry_quant){
+    list1 <- list(c(i,j)) #%>% print
+    #pairses <- list(c(i,j))
+    #list.append(pairses) %>% print
+    listylist <- append(i, list1)
+  }
+  #append(i,j) %>% print
+  print(listylist)
+}
+biglisttry <- list(c(levels(standard$`Target Name`)), c(levels(as.factor(standards$Quantity))))
+pairypairs <- 
+notloop <- lapply(standards, condensemean)
+condensemean <- function(target,quant){
+  
+  matrixydata[quantitylist,"Ct mean"]<-as.numeric(standards[standards$`Target Name`=="TET1" & standards$Quantity== i,]$Cт) %>% mean()
+}
+ 
+
+ 
+mean(standards$Cт)
+funtest <- function(q) {
+  grepl()
+  mean()
+}  
+funtest(standards$Cт)
+
+standards[c(1,3,5),c("Well","Cт","Quantity")]
+standards[standards$`Target Name`=="TET1" & standards$Quantity=="1",]
+#mean(standards[standards$`Target Name`=="TET1", standards$])
+levels(standards$`Target Name`)
+levels(standards$Quantity)
+as.factor(standards$Quantity)
+levels(as.factor(standards$Quantity))
+
+as.factor(standards$Quantity) %>% levels()
+
+unique(standards$Quantity) %>% length()
+
+
