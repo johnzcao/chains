@@ -40,15 +40,20 @@ if(!"UNKNOWN" %in% names(sep.data)) {
   colnames(unknown.mean) <- targets
   unknown.sd <- unknown.mean # copy empty dataframe
   # calculate mean and sd for each target/dilution pair
-  # functional but probably inefficient solution with for loops
+  # functional but inefficient solution with for loops
+  nrep <- 1
   for(x in samples){
     for(y in targets){
       z <- unknown[unknown$`Sample Name`==x & unknown$`Target Name`==y,]$Cт
       unknown.mean[x,y] <- mean(z)
       unknown.sd[x,y] <- sd(z)
+      # this test is to get the maximum number of replicate, in case replicate numbers are uneven
+      if(length(z)>nrep){ 
+        nrep <- length(z)
+      }
     }
   }
-  if(length(z)>2 & auto.outlier==T){
+  if(nrep>2 & auto.outlier==T){
     outlier.report <- outlier(unknown,
                               unknown.mean,
                               unknown.sd,
@@ -56,18 +61,21 @@ if(!"UNKNOWN" %in% names(sep.data)) {
                               is.standard = F)
     if(!is.null(outlier.report)){
       for(k in 1:nrow(outlier.report)){
-        samp <- outlier.report[k,1]
-        targ <- outlier.report[k,2]
-        newm <- outlier.report[k,4]
-        newsd <- outlier.report[k,5]
-        unknown.mean[samp,targ] <- newm
-        unknown.sd[samp,targ] <- newsd
+        if(outlier.report[k,3]!="undetermined"){
+          samp <- outlier.report[k,1]
+          targ <- outlier.report[k,2]
+          newm <- outlier.report[k,6]
+          newsd <- outlier.report[k,7]
+          unknown.mean[samp,targ] <- newm
+          unknown.sd[samp,targ] <- newsd
+          rm(samp,targ,newm,newsd)
+        }
       }
     }
   }
   
   # clean up environment
-  rm(samples,targets,unknown,x,y,z)
+  rm(samples,targets,unknown,x,y,z,nrep)
 }
 
 source("analysis.R")
