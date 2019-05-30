@@ -5,6 +5,7 @@ data.path <- c("Test_data_1.xls","Test_data_2.xls")
 data.path <- c("Test_data_3.xls")
 data.path <- c("Test_data_4.xls")
 data.path <- c("TF-1 data.xlsx")
+data.path <- "~/Downloads/Copy of ah12415_data.xls"
 
 library(dplyr)
 # Define analysis mode and controls. May be interactive in future versions
@@ -84,54 +85,51 @@ source("analysis.R")
 standards <- sep.data$STANDARD
 
 
-library(dplyr)
-targets <- levels(standards$`Target Name`)
-variablenumber <- length(targets)+1
-quantities <- as.factor(standards$Quantity) %>% levels()
-observnumber <- length(quantities)
-matrixydata <- as.data.frame(matrix(NA,observnumber,variablenumber))
-row.names(matrixydata) <- quantities
-colnames(matrixydata) <- c("Quantity", targets)
-matrixydata$Quantity<- quantities
-stdevydata <- matrixydata
+library(dplyr) #dplyr allows for piping
+targets <- levels(standards$`Target Name`) #levels will give all the different types within a column of a dataframe
+#targets is an array with all of the target standards
+variablenumber <- length(targets)+1 #dynamic number of columns
+quantities <- as.factor(standards$Quantity) %>% levels() #array with all the quantities
+observnumber <- length(quantities) #dynamic number of rows
+standardsmatrix <- as.data.frame(matrix(NA,observnumber,variablenumber)) #make table for ct means
+row.names(standardsmatrix) <- quantities #name rows with quantity values
+colnames(standardsmatrix) <- c("Quantity", targets) #name columns with targets
+standardsmatrix$Quantity<- quantities #assign first column to be quantities
+stdevstandardsmatrix <- standardsmatrix
 
-#find the mean of the standards in the raw data
 
-# first method of finding the mean of the standards and putting it into the table--for loop
-
-#for (i in quantitylist){
-#matrixydata[as.character(i),"Ct mean"]<-as.numeric(standards[standards$`Target Name`=="TET1" & standards$Quantity== i,]$Cт) %>% mean()
-
-#apply lapply method
-# step one is set up the function that will find the mean of the ct values  
+#finding the mean of the standards in the raw data and put it into the table--for loop
 
 for (i in targets){
   for (j in quantities){
     CT <-standards[standards$`Target Name`==i & standards$Quantity==j,]$Cт
     mean <- mean(CTy)
-    matrixydata[j,i] <-meany
+    standardsmatrix[j,i] <-meany
     st <- sd(CTy)
-    stdevydata[j,i] <- sty
+    stdevstandardsmatrix[j,i] <- sty
     rm(CT,mean, st)
   }
 }
+#apply lapply method
 
-matrixydata$Quantity <- log2(as.numeric(matrixydata$Quantity))
-#quantitiesln <- log2(as.numeric(quantities))
-#matrixydata$Quantity <- quantitiesln
+#convert the quantity values to log2
+standardsmatrix$Quantity <- log2(as.numeric(standardsmatrix$Quantity))
 
+#make empty list for the values that are to be reported
 report<- list()
-for (v in 1:ncol(matrixydata)){
-  if(v==1){
+
+#reporting efficiency and correlation values
+for (v in 1:ncol(standardsmatrix)){
+  if(v==1){ #skip the quantity column
     next
   }
-  slope<- lm(matrixydata[[v]]~matrixydata$Quantity)$coefficients[[2]]
-  efficiency <- 2^(-1/slope)
-  correlation <- cor(as.numeric(matrixydata$Quantity),matrixydata[[v]])
+  slope<- lm(standardsmatrix[[v]]~standardsmatrix$Quantity)$coefficients[[2]] #calculate the slope of from each column
+  efficiency <- 2^(-1/slope) #use the algebra to calculate the efficiency
+  correlation <- cor(as.numeric(standardsmatrix$Quantity),standardsmatrix[[v]]) #correlation of ct values with the quantity
   EandC <- c(efficiency,correlation) #make an array of the efficiency and the correlation
-  report[colnames(matrixydata[v])]<-list(EandC) #this takes existing (but empty) list 'report' gives it a name in the [] then adds the eandc to the list
+  report[colnames(standardsmatrix[v])]<-list(EandC) #this takes existing (but empty) list 'report' gives it a name in the [] then adds the eandc to the list
   print(report)
-  rm(slope, correlation, efficiency)
+  rm(slope, correlation, efficiency) 
 }
-#Keep: report matrixydata, stdev table, 
+#Keep: report standardsmatrix, stdev table, 
 rm(targets, variablenumber, quantities, observnumber)
